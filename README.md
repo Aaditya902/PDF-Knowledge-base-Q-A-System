@@ -2,6 +2,7 @@ PDF Knowledge Base Q&A System (Gemini + FAISS + Streamlit)
 
 An AI-powered document question-answering system that allows users to upload PDFs and ask questions about their content. The system uses semantic search (FAISS) and Google Gemini models to provide accurate, context-aware answers.
 
+
 Key Features
 
 Upload and process PDF documents
@@ -14,7 +15,11 @@ Interactive UI built with Streamlit
 Debug view for retrieved context
 
 
+
 Project Structure
+
+
+```bash
 rag-gemini/
 ├── app.py                    # Main Streamlit app
 ├── config.py                 # Configuration settings
@@ -30,6 +35,7 @@ rag-gemini/
     └── helpers.py             # UI helpers
 
 
+
 System Architecture
 
 flowchart TD
@@ -43,6 +49,7 @@ flowchart TD
     F --> G[Top-K Context]
     G --> H[Gemini LLM]
     H --> I[Answer + Confidence]
+
 
 
 Tech Stack
@@ -83,12 +90,14 @@ Create a .env file in root:
 GOOGLE_API_KEY=your_google_api_key
 
 
+
 Run the Application
 streamlit run app.py
 
 Open in browser:
 
 http://localhost:8501
+
 
 
 How It Works
@@ -119,6 +128,7 @@ Sends context + query to Gemini
 Generates response
 
 
+
 Confidence Scoring
 
 The system calculates confidence based on similarity scores:
@@ -128,6 +138,7 @@ The system calculates confidence based on similarity scores:
 | > 0.5   | High confidence |
 | 0.3–0.5 | Medium          |
 | < 0.3   | Low             |
+
 
 
 If you found this useful, give it a star!

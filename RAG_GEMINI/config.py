@@ -1,13 +1,17 @@
 import os
-#from dotenv import load_dotenv
+from dotenv import load_dotenv
 import streamlit as st
 
+load_dotenv()
 
-#load_dotenv()
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-# API Configuration
-GOOGLE_API_KEY = st.secrets("GOOGLE_API_KEY")
+if not GOOGLE_API_KEY:
+    GOOGLE_API_KEY = st.secrets.get("GOOGLE_API_KEY")
 
+if not GOOGLE_API_KEY:
+    raise ValueError("GOOGLE_API_KEY not found")
+    
 # Model Configuration
 AVAILABLE_MODELS = [
     "models/gemini-2.5-flash",

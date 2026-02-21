@@ -1,10 +1,12 @@
 import os
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
+import streamlit as st
 
-load_dotenv()
+
+#load_dotenv()
 
 # API Configuration
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+GOOGLE_API_KEY = st.secrets("GOOGLE_API_KEY")
 
 # Model Configuration
 AVAILABLE_MODELS = [

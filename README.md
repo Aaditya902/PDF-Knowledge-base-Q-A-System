@@ -34,7 +34,7 @@ rag-gemini/
     ├── __init__.py
     └── helpers.py             # UI helpers
 
-
+```
 
 System Architecture
 

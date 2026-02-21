@@ -39,16 +39,8 @@ rag-gemini/
 System Architecture
 
 flowchart TD
-    A[PDF Upload] --> B[Text Extraction]
-    B --> C[Chunking + Overlap]
-    C --> D[Embeddings]
-    D --> E[FAISS Index]
 
-    Q[User Query] --> QE[Query Embedding]
-    QE --> F[Similarity Search]
-    F --> G[Top-K Context]
-    G --> H[Gemini LLM]
-    H --> I[Answer + Confidence]
+![alt text](download.svg)
 
 
 

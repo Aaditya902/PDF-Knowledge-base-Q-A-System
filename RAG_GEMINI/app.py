@@ -150,7 +150,7 @@ def render_qa_section(retriever, qa_engine):
 
 def main():
     """Main application entry point."""
-    st.title("📚 PDF Knowledge Base Q&A with Gemini 2.5 Flash")
+    st.title("📚 PDF Knowledge Base Q&A")
     st.markdown("---")
     
     # Initialize session state

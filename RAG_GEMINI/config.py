@@ -15,8 +15,8 @@ if not GOOGLE_API_KEY:
 # Model Configuration
 AVAILABLE_MODELS = [
     "models/gemini-2.5-flash",
-    "models/gemini-2.5-pro", 
-    "models/gemini-2.0-flash",
+    #"models/gemini-2.5-pro", 
+    #"models/gemini-2.0-flash",
 ]
 
 DEFAULT_MODEL = "models/gemini-2.5-flash"

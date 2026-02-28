@@ -132,5 +132,3 @@ The system calculates confidence based on similarity scores:
 | < 0.3   | Low             |
 
 
-
-If you found this useful, give it a star!

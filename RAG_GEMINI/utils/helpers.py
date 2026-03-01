@@ -1,8 +1,8 @@
 import streamlit as st
 from typing import List, Tuple
+import os
 
 def get_confidence_color(confidence: float) -> str:
-    """Return color based on confidence score."""
     if confidence > 0.5:
         return "green"
     elif confidence > 0.3:
@@ -11,7 +11,6 @@ def get_confidence_color(confidence: float) -> str:
         return "red"
 
 def display_retrieved_context(results: List, max_length: int = 500):
-    """Display retrieved context in expander."""
     if results:
         with st.expander(f"🔍 Retrieved Context ({len(results)} chunks found)"):
             for i, (chunk, score) in enumerate(results, 1):
@@ -27,7 +26,6 @@ def display_retrieved_context(results: List, max_length: int = 500):
             st.write("3. Asking about specific topics in the document")
 
 def cleanup_temp_file(file_path: str):
-    """Clean up temporary file."""
-    import os
+    
     if os.path.exists(file_path):
         os.remove(file_path)

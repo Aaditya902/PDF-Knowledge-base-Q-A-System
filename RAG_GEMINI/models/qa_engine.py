@@ -5,7 +5,6 @@ import streamlit as st
 from config import GOOGLE_API_KEY, TEMPERATURE, TOP_P, MAX_OUTPUT_TOKENS
 
 class QAEngine:
-    """Handles question answering using Gemini."""
     
     def __init__(self, retriever, model_name: str):
         self.retriever = retriever
@@ -13,9 +12,7 @@ class QAEngine:
         self.model_name = model_name
     
     def generate_answer(self, query: str) -> Tuple[str, float, List[Tuple[str, float]]]:
-        """Generate answer using Gemini."""
         try:
-            # Retrieve relevant context
             results = self.retriever.query(query)
             
             # Debug: Store results in session state
@@ -43,13 +40,10 @@ class QAEngine:
     def _generate_with_context(self, results: List[Tuple[str, float]], 
                               query: str, avg_similarity: float) -> Tuple[str, float, List]:
         """Generate answer with given context."""
-        # Prepare context
         context = self._prepare_context(results[:3])
         
-        # Create prompt
         prompt = self._build_prompt(context, query)
         
-        # Generate response
         response = self.client.models.generate_content(
             model=self.model_name,
             contents=prompt,
@@ -63,7 +57,6 @@ class QAEngine:
         return response.text, avg_similarity, results
 
     def _prepare_context(self, results: List[Tuple[str, float]]) -> str:
-        """Prepare context from retrieved chunks."""
         context_parts = []
         for i, (chunk, score) in enumerate(results):
             context_parts.append(f"[Context {i+1} (Relevance: {score:.2f})]:\n{chunk}")
@@ -71,7 +64,6 @@ class QAEngine:
         return '\n\n'.join(context_parts)
 
     def _build_prompt(self, context: str, query: str) -> str:
-        """Build prompt for Gemini."""
         return f"""You are a helpful assistant that answers questions based on the provided document context.
 
 CONTEXT FROM DOCUMENT:

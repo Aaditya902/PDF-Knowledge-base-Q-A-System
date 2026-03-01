@@ -2,9 +2,7 @@ import PyPDF2
 from typing import List
 from config import MAX_CHUNK_SIZE
 
-class DocumentProcessor:
-    """Handles PDF text extraction and chunking."""
-    
+class DocumentProcessor:    
     @staticmethod
     def extract_text_from_pdf(pdf_path: str) -> str:
         """Extract text content from PDF file."""
@@ -25,7 +23,6 @@ class DocumentProcessor:
         """Split text into chunks with overlap for better context."""
         chunks = []
         
-        # Split by paragraphs first
         paragraphs = text.split('\n\n')
         
         current_chunk = []
@@ -38,22 +35,18 @@ class DocumentProcessor:
             
             para_length = len(para)
             
-            # If single paragraph is too long, split by sentences
             if para_length > max_size:
                 chunks.extend(DocumentProcessor._split_long_paragraph(para, max_size, current_chunk, current_length))
                 current_chunk = []
                 current_length = 0
             else:
-                # Paragraph fits, add to current chunk
                 current_chunk, current_length = DocumentProcessor._add_to_chunk(
                     para, current_chunk, current_length, max_size, chunks
                 )
         
-        # Add last chunk
         if current_chunk:
             chunks.append(' '.join(current_chunk))
         
-        # Create overlapping chunks
         return DocumentProcessor._create_overlapping_chunks(chunks, max_size)
 
     @staticmethod

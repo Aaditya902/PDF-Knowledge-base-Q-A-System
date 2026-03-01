@@ -19,7 +19,6 @@ st.set_page_config(
 )
 
 def initialize_session_state():
-    """Initialize session state variables."""
     if 'last_results' not in st.session_state:
         st.session_state['last_results'] = []
     if 'query' not in st.session_state:
@@ -30,7 +29,6 @@ def initialize_session_state():
         st.session_state['qa_engine'] = None
 
 def render_sidebar():
-    """Render sidebar with configuration options."""
     with st.sidebar:
         st.header("⚙️ Configuration")
         
@@ -54,7 +52,6 @@ def render_sidebar():
         return selected_model
 
 def render_upload_section():
-    """Render document upload section."""
     st.header("📄 Document Upload")
     return st.file_uploader("Choose a PDF file", type="pdf")
 
@@ -106,7 +103,6 @@ def process_document(uploaded_file, selected_model):
         cleanup_temp_file(temp_path)
 
 def render_qa_section(retriever, qa_engine):
-    """Render question answering section."""
     st.header("💬 Ask Questions")
     
     # Example questions
@@ -135,36 +131,28 @@ def render_qa_section(retriever, qa_engine):
             with st.spinner("🤔 Thinking with Gemini..."):
                 response, confidence, results = qa_engine.generate_answer(user_query)
             
-            # Display answer
             st.markdown("### 📝 Answer")
             st.markdown(response)
             
-            # Show confidence
             color = get_confidence_color(confidence)
             st.markdown(f"**Confidence:** :{color}[{confidence:.2f}]")
             
-            # Show retrieved context
             display_retrieved_context(results)
         else:
             st.warning("Please enter a question.")
 
 def main():
-    """Main application entry point."""
     st.title("📚 PDF Knowledge Base Q&A")
     st.markdown("---")
     
-    # Initialize session state
     initialize_session_state()
     
-    # Check API key
     if not GOOGLE_API_KEY:
         st.error("⚠️ Google API key not found. Please set GOOGLE_API_KEY in your .env file")
         return
     
-    # Render sidebar
     selected_model = render_sidebar()
     
-    # Main content area
     col1, col2 = st.columns([1, 1])
     
     with col1:
@@ -183,7 +171,6 @@ def main():
         else:
             st.info("👈 Upload a PDF to start asking questions")
             
-            # Tips
             st.markdown("### 💡 Tips for better results:")
             st.markdown("""
             - Upload documents with clear text (not scanned images)

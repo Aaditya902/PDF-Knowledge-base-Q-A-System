@@ -64,7 +64,7 @@ Tech Stack:
 Setup Instructions:
 
 1. Clone Repository
-git clone https://github.com/your-username/rag-gemini.git
+git clone https://github.com/Aaditya902/rag-gemini.git
 cd rag-gemini
 
 2. Create Virtual Environment

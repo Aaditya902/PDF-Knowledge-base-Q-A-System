@@ -5,7 +5,6 @@ from config import MAX_CHUNK_SIZE
 class DocumentProcessor:    
     @staticmethod
     def extract_text_from_pdf(pdf_path: str) -> str:
-        """Extract text content from PDF file."""
         try:
             with open(pdf_path, 'rb') as file:
                 reader = PyPDF2.PdfReader(file)

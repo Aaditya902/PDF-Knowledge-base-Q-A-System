@@ -85,7 +85,6 @@ def process_document(uploaded_file, selected_model):
 
         st.success(f"✅ Processed {len(chunks)} document chunks")
         
-        # Show document preview
         with st.expander("📖 Document Preview (First 3 chunks)"):
             for i, chunk in enumerate(chunks[:3]):
                 st.markdown(f"**Chunk {i+1}:**")
@@ -104,7 +103,6 @@ def process_document(uploaded_file, selected_model):
 def render_qa_section(retriever, qa_engine):
     st.header("💬 Ask Questions")
     
-    # Example questions
     st.markdown("**Try asking:**")
     example_questions = [
         "What is this document about?",
@@ -117,7 +115,6 @@ def render_qa_section(retriever, qa_engine):
             st.session_state['query'] = eq
             st.rerun()
     
-    # User query input
     user_query = st.text_area(
         "Enter your question:",
         height=100,

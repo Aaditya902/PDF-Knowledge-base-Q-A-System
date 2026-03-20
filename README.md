@@ -20,7 +20,7 @@ Project Structure:
 
 
 ```bash
-rag-gemini/
+PDF-Knowledge-base-Q-A-System/
 ├── app.py                    # Main Streamlit app
 ├── config.py                 # Configuration settings
 ├── requirements.txt          # Dependencies
@@ -49,7 +49,7 @@ Tech Stack:
 | Layer        | Technology                                          | Reasoning                                 |
 | ------------ | --------------------------------------------------- | ----------------------------------------- |
 | UI           | Streamlit                                           | Rapid prototyping for interactive AI apps |
-| LLM          | Google Gemini (`2.5-flash`, `2.5-pro`, `2.0-flash`) | Fast, cost-efficient generation           |
+| LLM          | Google Gemini (`2.5-flash`)                         | Fast, cost-efficient generation           |
 | RAG Pipeline | Custom implementation                               | Full control over retrieval logic         |
 | Embeddings   | Sentence Transformers (`all-MiniLM-L6-v2`)          | Lightweight, low latency                  |
 | Vector Store | FAISS (`IndexFlatL2`)                               | Exact search, no external dependency      |
@@ -64,8 +64,8 @@ Tech Stack:
 Setup Instructions:
 
 1. Clone Repository
-git clone https://github.com/Aaditya902/rag-gemini.git
-cd rag-gemini
+git clone https://github.com/Aaditya902/PDF-Knowledge-base-Q-A-System.git 
+cd PDF-Knowledge-base-Q-A-System
 
 2. Create Virtual Environment
 python -m venv myenv

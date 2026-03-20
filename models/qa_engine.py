@@ -15,7 +15,6 @@ class QAEngine:
         try:
             results = self.retriever.query(query)
             
-            # Debug: Store results in session state
             st.session_state['last_results'] = results
             
             if not results:
@@ -28,7 +27,6 @@ class QAEngine:
             return f"Error generating response: {str(e)}", 0.0, []
 
     def _handle_no_results(self, query: str) -> Tuple[str, float, List]:
-        """Handle case when no results are found."""
         results = self.retriever.query(query, k=1)
         if results:
             return self._generate_with_context(results, query, results[0][1])
@@ -39,7 +37,6 @@ class QAEngine:
 
     def _generate_with_context(self, results: List[Tuple[str, float]], 
                               query: str, avg_similarity: float) -> Tuple[str, float, List]:
-        """Generate answer with given context."""
         context = self._prepare_context(results[:3])
         
         prompt = self._build_prompt(context, query)

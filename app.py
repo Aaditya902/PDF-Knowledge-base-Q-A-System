@@ -56,7 +56,6 @@ def render_upload_section():
     return st.file_uploader("Choose a PDF file", type="pdf")
 
 def process_document(uploaded_file, selected_model):
-    """Process uploaded document and initialize RAG components."""
     temp_path = "temp.pdf"
     
     # Save temporary file

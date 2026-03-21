@@ -7,10 +7,10 @@ load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 if not GOOGLE_API_KEY:
-    GOOGLE_API_KEY = st.secrets.get("GOOGLE_API_KEY")
-
-if not GOOGLE_API_KEY:
-    raise ValueError("GOOGLE_API_KEY not found")
+    try:
+        GOOGLE_API_KEY = st.secrets.get("GOOGLE_API_KEY")
+    except Exception:
+        pass  # st.secrets not available in all environments
     
 AVAILABLE_MODELS = [
     "models/gemini-2.5-flash",

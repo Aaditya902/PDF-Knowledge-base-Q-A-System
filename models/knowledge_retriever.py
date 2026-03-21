@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 import faiss
 from typing import List, Tuple
@@ -5,6 +6,8 @@ from sentence_transformers import SentenceTransformer
 import streamlit as st
 
 from config import EMBEDDING_MODEL_NAME, SIMILARITY_THRESHOLD, TOP_K_RESULTS
+
+logger = logging.getLogger(__name__)
 
 class KnowledgeRetriever:
 
@@ -24,9 +27,7 @@ class KnowledgeRetriever:
         self.embeddings = np.array(self._get_embeddings(chunks))
         self.index = faiss.IndexFlatL2(self.embeddings.shape[1])
         self.index.add(self.embeddings)
-        
-        # Store for debugging
-        st.session_state['total_chunks'] = len(chunks)
+        logger.info("FAISS index built with %d chunks", len(chunks))
 
     def query(self, text: str, k: int = TOP_K_RESULTS) -> List[Tuple[str, float]]:
         if not self.index:

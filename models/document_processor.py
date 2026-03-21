@@ -3,9 +3,15 @@ import PyPDF2
 import tiktoken
 from typing import List, Union, IO
 
-
 MAX_TOKENS = 400
-_ENCODER = tiktoken.get_encoding("cl100k_base")
+
+_encoder = None
+
+def _get_encoder():
+    global _encoder
+    if _encoder is None:
+        _encoder = tiktoken.get_encoding("cl100k_base")
+    return _encoder
 
 
 class DocumentProcessor:
@@ -38,11 +44,10 @@ class DocumentProcessor:
 
     @staticmethod
     def _count_tokens(text: str) -> int:
-        return len(_ENCODER.encode(text))
+        return len(_get_encoder().encode(text))
 
     @staticmethod
     def _split_into_sentences(text: str) -> List[str]:
-        """Sentence splitter using regex boundary detection."""
         sentences = re.split(r'(?<=[.!?])\s+', text)
         return [s.strip() for s in sentences if s.strip()]
 
@@ -56,6 +61,7 @@ class DocumentProcessor:
             if para:
                 all_sentences.extend(DocumentProcessor._split_into_sentences(para))
 
+        encoder = _get_encoder()
         chunks: List[str] = []
         current_sentences: List[str] = []
         current_tokens = 0
@@ -63,15 +69,13 @@ class DocumentProcessor:
         for sentence in all_sentences:
             sentence_tokens = DocumentProcessor._count_tokens(sentence)
 
-            # Hard-truncate sentences that exceed the limit on their own
             if sentence_tokens > max_tokens:
-                token_ids = _ENCODER.encode(sentence)
-                sentence = _ENCODER.decode(token_ids[:max_tokens])
+                token_ids = encoder.encode(sentence)
+                sentence = encoder.decode(token_ids[:max_tokens])
                 sentence_tokens = max_tokens
 
             if current_tokens + sentence_tokens > max_tokens and current_sentences:
                 chunks.append(' '.join(current_sentences))
-                # Carry over last N sentences as overlap into the next chunk
                 current_sentences = current_sentences[-overlap_sentences:]
                 current_tokens = DocumentProcessor._count_tokens(' '.join(current_sentences))
 

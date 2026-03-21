@@ -10,8 +10,8 @@ if not GOOGLE_API_KEY:
     try:
         GOOGLE_API_KEY = st.secrets.get("GOOGLE_API_KEY")
     except Exception:
-        pass  # st.secrets not available in all environments
-    
+        pass  
+
 AVAILABLE_MODELS = [
     "models/gemini-2.5-flash",
     #"models/gemini-2.5-pro", 
@@ -20,7 +20,6 @@ AVAILABLE_MODELS = [
 
 DEFAULT_MODEL = "models/gemini-2.5-flash"
 
-MAX_CHUNK_SIZE = 1000
 SIMILARITY_THRESHOLD = 0.3
 TOP_K_RESULTS = 5
 

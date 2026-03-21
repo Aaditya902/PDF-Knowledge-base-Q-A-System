@@ -1,7 +1,10 @@
+import logging
 from typing import List, Tuple
 from google import genai
 
 from config import GOOGLE_API_KEY, TEMPERATURE, TOP_P, MAX_OUTPUT_TOKENS
+
+logger = logging.getLogger(__name__)
 
 
 class QAEngine:
@@ -17,17 +20,19 @@ class QAEngine:
             results = self.retriever.query(query)
 
             if not results:
-                return self._handle_no_results(query)
+                return self._fallback_to_single_result(query)
 
             avg_similarity = sum(r[1] for r in results) / len(results)
             return self._generate_with_context(results, query, avg_similarity)
 
         except Exception as e:
+            logger.exception("Error generating answer for query: %s", query)
             return f"Error generating response: {str(e)}", 0.0, []
 
-    def _handle_no_results(self, query: str) -> Tuple[str, float, List]:
+    def _fallback_to_single_result(self, query: str) -> Tuple[str, float, List]:
         results = self.retriever.query(query, k=1)
         if results:
+            logger.info("Primary query returned no results; using single-result fallback")
             return self._generate_with_context(results, query, results[0][1])
         return (
             "I couldn't find relevant information in the document. "

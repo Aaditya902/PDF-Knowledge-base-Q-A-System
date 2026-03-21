@@ -1,4 +1,4 @@
-import io
+import logging
 import os
 import tempfile
 import shutil
@@ -11,7 +11,16 @@ from config import (
 from models.document_processor import DocumentProcessor, MAX_TOKENS
 from models.knowledge_retriever import KnowledgeRetriever
 from models.qa_engine import QAEngine
-from utils.helpers import get_confidence_color, display_retrieved_context
+from utils.helpers import get_confidence_color, display_retrieved_context, truncate
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+logger = logging.getLogger(__name__)
+
+KEY_RETRIEVER   = "retriever"
+KEY_QA_ENGINE   = "qa_engine"
+KEY_LAST_RESULTS = "last_results"
+KEY_QUERY       = "query"
+KEY_SESSION_DIR = "session_dir"
 
 st.set_page_config(
     page_title="PDF Q&A with Gemini",
@@ -22,9 +31,9 @@ st.set_page_config(
 
 def get_session_dir() -> str:
     """Return a per-session temp directory, creating it if needed."""
-    if 'session_dir' not in st.session_state:
-        st.session_state['session_dir'] = tempfile.mkdtemp(prefix="pdf_qa_")
-    return st.session_state['session_dir']
+    if KEY_SESSION_DIR not in st.session_state:
+        st.session_state[KEY_SESSION_DIR] = tempfile.mkdtemp(prefix="pdf_qa_")
+    return st.session_state[KEY_SESSION_DIR]
 
 
 def get_session_pdf_path() -> str:
@@ -34,7 +43,7 @@ def get_session_pdf_path() -> str:
 
 def cleanup_session_dir():
     """Remove the session temp directory and all its contents."""
-    session_dir = st.session_state.get('session_dir')
+    session_dir = st.session_state.get(KEY_SESSION_DIR)
     if session_dir and os.path.exists(session_dir):
         shutil.rmtree(session_dir, ignore_errors=True)
 
@@ -42,11 +51,11 @@ def cleanup_session_dir():
 
 def initialize_session_state():
     defaults = {
-        'last_results': [],
-        'query': '',
-        'retriever': None,
-        'qa_engine': None,
-        'session_dir': None,
+        KEY_LAST_RESULTS: [],
+        KEY_QUERY:        '',
+        KEY_RETRIEVER:    None,
+        KEY_QA_ENGINE:    None,
+        KEY_SESSION_DIR:  None,
     }
     for key, val in defaults.items():
         if key not in st.session_state:
@@ -78,6 +87,7 @@ def render_sidebar():
         return selected_model
 
 
+
 def process_document(uploaded_file, selected_model):
     temp_path = get_session_pdf_path()
 
@@ -99,7 +109,6 @@ def process_document(uploaded_file, selected_model):
             retriever = KnowledgeRetriever()
             retriever.build_index(chunks)
 
-
             qa_engine = QAEngine(retriever, selected_model)
 
         st.success(f"✅ Processed {len(chunks)} document chunks")
@@ -107,7 +116,7 @@ def process_document(uploaded_file, selected_model):
         with st.expander("📖 Document Preview (First 3 chunks)"):
             for i, chunk in enumerate(chunks[:3]):
                 st.markdown(f"**Chunk {i+1}:**")
-                st.markdown(chunk[:300] + "..." if len(chunk) > 300 else chunk)
+                st.markdown(truncate(chunk, 300))
                 st.markdown("---")
 
         return retriever, qa_engine
@@ -130,13 +139,13 @@ def render_qa_section(retriever, qa_engine):
 
     for eq in example_questions:
         if st.button(f"📌 {eq}", key=eq):
-            st.session_state['query'] = eq
+            st.session_state[KEY_QUERY] = eq
             st.rerun()
 
     user_query = st.text_area(
         "Enter your question:",
         height=100,
-        value=st.session_state.get('query', ''),
+        value=st.session_state.get(KEY_QUERY, ''),
         placeholder="e.g., What is the main topic of this document?"
     )
 
@@ -145,8 +154,7 @@ def render_qa_section(retriever, qa_engine):
             with st.spinner("🤔 Thinking with Gemini..."):
                 response, confidence, results = qa_engine.generate_answer(user_query)
 
-            # State update belongs here, not inside the model
-            st.session_state['last_results'] = results
+            st.session_state[KEY_LAST_RESULTS] = results
 
             st.markdown("### 📝 Answer")
             st.markdown(response)
@@ -181,14 +189,14 @@ def main():
             retriever, qa_engine = process_document(uploaded_file, selected_model)
 
             if retriever and qa_engine:
-                st.session_state['retriever'] = retriever
-                st.session_state['qa_engine'] = qa_engine
+                st.session_state[KEY_RETRIEVER] = retriever
+                st.session_state[KEY_QA_ENGINE] = qa_engine
 
     with col2:
-        if st.session_state['retriever'] and st.session_state['qa_engine']:
+        if st.session_state[KEY_RETRIEVER] and st.session_state[KEY_QA_ENGINE]:
             render_qa_section(
-                st.session_state['retriever'],
-                st.session_state['qa_engine']
+                st.session_state[KEY_RETRIEVER],
+                st.session_state[KEY_QA_ENGINE]
             )
         else:
             st.info("👈 Upload a PDF to start asking questions")

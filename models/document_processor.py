@@ -1,105 +1,84 @@
+import re
 import PyPDF2
-from typing import List
-from config import MAX_CHUNK_SIZE
+import tiktoken
+from typing import List, Union, IO
 
-class DocumentProcessor:    
+
+MAX_TOKENS = 400
+_ENCODER = tiktoken.get_encoding("cl100k_base")
+
+
+class DocumentProcessor:
+
     @staticmethod
-    def extract_text_from_pdf(pdf_path: str) -> str:
+    def extract_text_from_pdf(pdf_source: Union[str, IO]) -> str:
+
         try:
-            with open(pdf_path, 'rb') as file:
-                reader = PyPDF2.PdfReader(file)
-                text = []
-                for page_num, page in enumerate(reader.pages):
-                    page_text = page.extract_text()
-                    if page_text:
-                        text.append(f"[Page {page_num + 1}]\n{page_text}")
-                return '\n\n'.join(text).strip()
+            if isinstance(pdf_source, str):
+                file = open(pdf_source, 'rb')
+                should_close = True
+            else:
+                file = pdf_source
+                should_close = False
+
+            reader = PyPDF2.PdfReader(file)
+            text = []
+            for page_num, page in enumerate(reader.pages):
+                page_text = page.extract_text()
+                if page_text:
+                    text.append(f"[Page {page_num + 1}]\n{page_text}")
+
+            if should_close:
+                file.close()
+
+            return '\n\n'.join(text).strip()
+
         except Exception as e:
             raise RuntimeError(f"PDF extraction failed: {str(e)}")
 
     @staticmethod
-    def chunk_text(text: str, max_size: int = MAX_CHUNK_SIZE) -> List[str]:
-        """Split text into chunks with overlap for better context."""
-        chunks = []
-        
+    def _count_tokens(text: str) -> int:
+        return len(_ENCODER.encode(text))
+
+    @staticmethod
+    def _split_into_sentences(text: str) -> List[str]:
+        """Sentence splitter using regex boundary detection."""
+        sentences = re.split(r'(?<=[.!?])\s+', text)
+        return [s.strip() for s in sentences if s.strip()]
+
+    @staticmethod
+    def chunk_text(text: str, max_tokens: int = MAX_TOKENS, overlap_sentences: int = 2) -> List[str]:
+
         paragraphs = text.split('\n\n')
-        
-        current_chunk = []
-        current_length = 0
-        
+        all_sentences: List[str] = []
         for para in paragraphs:
             para = para.strip()
-            if not para:
-                continue
-            
-            para_length = len(para)
-            
-            if para_length > max_size:
-                chunks.extend(DocumentProcessor._split_long_paragraph(para, max_size, current_chunk, current_length))
-                current_chunk = []
-                current_length = 0
-            else:
-                current_chunk, current_length = DocumentProcessor._add_to_chunk(
-                    para, current_chunk, current_length, max_size, chunks
-                )
-        
-        if current_chunk:
-            chunks.append(' '.join(current_chunk))
-        
-        return DocumentProcessor._create_overlapping_chunks(chunks, max_size)
+            if para:
+                all_sentences.extend(DocumentProcessor._split_into_sentences(para))
 
-    @staticmethod
-    def _split_long_paragraph(para: str, max_size: int, current_chunk: List, current_length: int) -> List[str]:
-        """Split a long paragraph into sentences."""
-        chunks = []
-        sentences = para.split('. ')
-        
-        for sentence in sentences:
-            sentence = sentence.strip()
-            if not sentence:
-                continue
-            if not sentence.endswith('.'):
-                sentence += '.'
-            
-            if len(sentence) > max_size:
-                chunks.append(sentence[:max_size])
-            else:
-                if current_length + len(sentence) > max_size and current_chunk:
-                    chunks.append(' '.join(current_chunk))
-                    current_chunk = []
-                    current_length = 0
-                current_chunk.append(sentence)
-                current_length += len(sentence) + 1
-        
-        if current_chunk:
-            chunks.append(' '.join(current_chunk))
-        
+        chunks: List[str] = []
+        current_sentences: List[str] = []
+        current_tokens = 0
+
+        for sentence in all_sentences:
+            sentence_tokens = DocumentProcessor._count_tokens(sentence)
+
+            # Hard-truncate sentences that exceed the limit on their own
+            if sentence_tokens > max_tokens:
+                token_ids = _ENCODER.encode(sentence)
+                sentence = _ENCODER.decode(token_ids[:max_tokens])
+                sentence_tokens = max_tokens
+
+            if current_tokens + sentence_tokens > max_tokens and current_sentences:
+                chunks.append(' '.join(current_sentences))
+                # Carry over last N sentences as overlap into the next chunk
+                current_sentences = current_sentences[-overlap_sentences:]
+                current_tokens = DocumentProcessor._count_tokens(' '.join(current_sentences))
+
+            current_sentences.append(sentence)
+            current_tokens += sentence_tokens
+
+        if current_sentences:
+            chunks.append(' '.join(current_sentences))
+
         return chunks
-
-    @staticmethod
-    def _add_to_chunk(para: str, current_chunk: List, current_length: int, max_size: int, chunks: List) -> tuple:
-        """Add paragraph to current chunk or create new chunk."""
-        para_length = len(para)
-        
-        if current_length + para_length > max_size and current_chunk:
-            chunks.append(' '.join(current_chunk))
-            current_chunk = []
-            current_length = 0
-        
-        current_chunk.append(para)
-        current_length += para_length + 2
-        
-        return current_chunk, current_length
-
-    @staticmethod
-    def _create_overlapping_chunks(chunks: List[str], max_size: int) -> List[str]:
-        """Create overlapping chunks for better retrieval."""
-        overlapping_chunks = []
-        for i in range(len(chunks)):
-            if i > 0:
-                combined = chunks[i-1] + " " + chunks[i]
-                if len(combined) <= max_size * 1.5:
-                    overlapping_chunks.append(combined)
-            overlapping_chunks.append(chunks[i])
-        
-        return overlapping_chunks

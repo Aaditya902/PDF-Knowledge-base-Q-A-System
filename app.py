@@ -5,7 +5,7 @@ import shutil
 import streamlit as st
 
 from config import (
-    GOOGLE_API_KEY, AVAILABLE_MODELS, DEFAULT_MODEL,
+    GOOGLE_API_KEY, AVAILABLE_MODELS,
     SIMILARITY_THRESHOLD, TOP_K_RESULTS
 )
 from models.document_processor import DocumentProcessor, MAX_TOKENS
@@ -31,7 +31,7 @@ st.set_page_config(
 
 def get_session_dir() -> str:
     """Return a per-session temp directory, creating it if needed."""
-    if KEY_SESSION_DIR not in st.session_state:
+    if not st.session_state.get(KEY_SESSION_DIR):
         st.session_state[KEY_SESSION_DIR] = tempfile.mkdtemp(prefix="pdf_qa_")
     return st.session_state[KEY_SESSION_DIR]
 
@@ -48,7 +48,6 @@ def cleanup_session_dir():
         shutil.rmtree(session_dir, ignore_errors=True)
 
 
-
 def initialize_session_state():
     defaults = {
         KEY_LAST_RESULTS: [],
@@ -60,7 +59,6 @@ def initialize_session_state():
     for key, val in defaults.items():
         if key not in st.session_state:
             st.session_state[key] = val
-
 
 
 def render_sidebar():
@@ -85,7 +83,6 @@ def render_sidebar():
             st.rerun()
 
         return selected_model
-
 
 
 def process_document(uploaded_file, selected_model):
@@ -125,7 +122,6 @@ def process_document(uploaded_file, selected_model):
         st.error(f"❌ Error: {str(e)}")
         st.exception(e)
         return None, None
-
 
 def render_qa_section(retriever, qa_engine):
     st.header("💬 Ask Questions")

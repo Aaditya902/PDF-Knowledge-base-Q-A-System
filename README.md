@@ -62,16 +62,49 @@ flowchart TD
 Chunking Strategy:
 
 Text is split using a token-aware, sentence-level chunker built on tiktoken.
-Why token-aware: The embedding model all-MiniLM-L6-v2 has a hard limit of 512 tokens. A character-based chunker (e.g. 1000 chars) silently produces chunks that exceed this limit — the model truncates them without any error, degrading retrieval quality invisibly on longer documents.
+Why token-aware: The embedding model all-MiniLM-L6-v2 has a hard limit of 512 tokens. A character-based chunker (e.g. 1000 chars) silently produces chunks that exceed this limit the model truncates them without any error, degrading retrieval quality invisibly on longer documents.
+
 How it works:
 
 Full document text is split into sentences using regex boundary detection.
 Sentences are accumulated into a chunk until the next sentence would push the token count past 400 (conservative limit below the 512-token cap).
-When a chunk is full, the last 2 sentences are carried into the next chunk as overlap — preserving cross-boundary context.
+When a chunk is full, the last 2 sentences are carried into the next chunk as overlap preserving cross-boundary context.
 Any single sentence exceeding 400 tokens is hard-truncated at the token boundary.
 
 
-Setup Instructions:
+**Parameters (configurable in `document_processor.py`):**
+
+| Parameter | Default | Description |
+|---|---|---|
+| `max_tokens` | 400 | Max tokens per chunk |
+| `overlap_sentences` | 2 | Sentences carried into next chunk |
+
+
+Retrieval Method:
+
+Retrieval uses FAISS IndexFlatL2 — exact brute-force nearest-neighbour search over L2 (Euclidean) distance.
+Flow:
+
+Query is embedded using the same all-MiniLM-L6-v2 model used at index time.
+FAISS searches all chunk embeddings and returns the top-k closest vectors.
+L2 distance is converted to a similarity score: similarity = 1 / (1 + distance).
+Chunks below the similarity threshold (0.3) are filtered out.
+Remaining results are sorted by similarity descending.
+Top 3 chunks are passed as context to Gemini.
+
+Fallback: If no chunks meet the threshold, the retriever retries with k=1 and no threshold filter, ensuring the model always receives some context rather than returning a blank answer.
+
+
+Confidence Scoring:
+
+The system calculates confidence based on similarity scores:
+
+| Score   | Meaning         |
+| ------- | --------------- |
+| > 0.5   | High confidence |
+| 0.3–0.5 | Medium          |
+| < 0.3   | Low             |
+
 
 1. Clone Repository
 git clone https://github.com/Aaditya902/PDF-Knowledge-base-Q-A-System.git 
@@ -130,15 +163,5 @@ Sends context + query to Gemini
 Generates response
 
 
-
-Confidence Scoring:
-
-The system calculates confidence based on similarity scores:
-
-| Score   | Meaning         |
-| ------- | --------------- |
-| > 0.5   | High confidence |
-| 0.3–0.5 | Medium          |
-| < 0.3   | Low             |
 
 

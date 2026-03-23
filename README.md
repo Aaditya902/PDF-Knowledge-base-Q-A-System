@@ -1,6 +1,6 @@
 PDF Knowledge Base Q&A System (Gemini + FAISS + Streamlit):
 
-An AI-powered document question-answering system that allows users to upload PDFs and ask questions about their content. The system uses semantic search (FAISS) and Google Gemini models to provide accurate, context-aware answers.
+An AI-powered document question-answering system. Upload a PDF, ask questions, get context-aware answers backed by semantic search and Google Gemini.
 
 
 Key Features:
@@ -13,6 +13,22 @@ Answer generation using Google Gemini
 Confidence scoring for responses
 Interactive UI built with Streamlit
 Debug view for retrieved context
+
+
+Tech Stack:
+
+| Layer        | Technology                                          | Reasoning                                 |
+| ------------ | --------------------------------------------------- | ----------------------------------------- |
+| UI           | Streamlit                                           | Rapid prototyping for interactive AI apps |
+| LLM          | Google Gemini (`2.5-flash`)                         | Fast, cost-efficient generation           |
+| RAG Pipeline | Custom implementation                               | Full control over retrieval logic         |
+| Embeddings   | Sentence Transformers (`all-MiniLM-L6-v2`)          | Lightweight, low latency                  |
+| Vector Store | FAISS (`IndexFlatL2`)                               | Exact search, no external dependency      |
+| PDF Parsing  | PyPDF2                                              | Simple text extraction                    |
+| Numerical    | NumPy                                               | Efficient vector operations               |
+| API Client   | google-genai                                        | Gemini integration                        |
+| State Mgmt   | Streamlit session state                             | Maintain UI state                         |
+| Language     | Python                                              | Ecosystem support                         |
 
 
 
@@ -43,21 +59,6 @@ flowchart TD
 ![alt text](download.svg)
 
 
-
-Tech Stack:
-
-| Layer        | Technology                                          | Reasoning                                 |
-| ------------ | --------------------------------------------------- | ----------------------------------------- |
-| UI           | Streamlit                                           | Rapid prototyping for interactive AI apps |
-| LLM          | Google Gemini (`2.5-flash`)                         | Fast, cost-efficient generation           |
-| RAG Pipeline | Custom implementation                               | Full control over retrieval logic         |
-| Embeddings   | Sentence Transformers (`all-MiniLM-L6-v2`)          | Lightweight, low latency                  |
-| Vector Store | FAISS (`IndexFlatL2`)                               | Exact search, no external dependency      |
-| PDF Parsing  | PyPDF2                                              | Simple text extraction                    |
-| Numerical    | NumPy                                               | Efficient vector operations               |
-| API Client   | google-genai                                        | Gemini integration                        |
-| State Mgmt   | Streamlit session state                             | Maintain UI state                         |
-| Language     | Python                                              | Ecosystem support                         |
 
 
 

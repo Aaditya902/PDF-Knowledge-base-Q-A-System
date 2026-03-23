@@ -106,6 +106,24 @@ The system calculates confidence based on similarity scores:
 | < 0.3   | Low             |
 
 
+Guardrails
+Prompt-level:
+
+Gemini is instructed to answer only from the provided context.
+If the context doesn't contain relevant information, it must say so explicitly rather than hallucinating.
+
+Retrieval-level:
+
+Similarity threshold of 0.3 prevents low-quality chunks from reaching the model.
+Only the top 3 chunks are sent, keeping context focused.
+
+Application-level:
+
+Per-session temp directories prevent file collisions between concurrent users.
+Config never raises at import time — missing API key shows a user-friendly error instead of a crash.
+All errors are logged server-side via Python logging for observability.
+
+
 1. Clone Repository
 git clone https://github.com/Aaditya902/PDF-Knowledge-base-Q-A-System.git 
 cd PDF-Knowledge-base-Q-A-System

@@ -59,7 +59,16 @@ flowchart TD
 ![alt text](download.svg)
 
 
+Chunking Strategy:
 
+Text is split using a token-aware, sentence-level chunker built on tiktoken.
+Why token-aware: The embedding model all-MiniLM-L6-v2 has a hard limit of 512 tokens. A character-based chunker (e.g. 1000 chars) silently produces chunks that exceed this limit — the model truncates them without any error, degrading retrieval quality invisibly on longer documents.
+How it works:
+
+Full document text is split into sentences using regex boundary detection.
+Sentences are accumulated into a chunk until the next sentence would push the token count past 400 (conservative limit below the 512-token cap).
+When a chunk is full, the last 2 sentences are carried into the next chunk as overlap — preserving cross-boundary context.
+Any single sentence exceeding 400 tokens is hard-truncated at the token boundary.
 
 
 Setup Instructions:

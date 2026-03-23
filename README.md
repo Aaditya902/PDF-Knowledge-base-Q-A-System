@@ -82,7 +82,7 @@ Sends context + query to Gemini
 Generates response
 
 
-# Parameters (configurable in `document_processor.py`):
+## Parameters (configurable in `document_processor.py`):
 
 | Parameter | Default | Description |
 |---|---|---|

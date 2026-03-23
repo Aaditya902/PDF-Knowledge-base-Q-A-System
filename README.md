@@ -120,9 +120,21 @@ Only the top 3 chunks are sent, keeping context focused.
 Application-level:
 
 Per-session temp directories prevent file collisions between concurrent users.
-Config never raises at import time — missing API key shows a user-friendly error instead of a crash.
+Config never raises at import time, missing API key shows a user-friendly error instead of a crash.
 All errors are logged server-side via Python logging for observability.
 
+## Known Failure Cases
+
+| Scenario | Behaviour |
+|---|---|
+| Scanned PDF (image-based) | PyPDF2 extracts no text; app shows "No text could be extracted" |
+| Very long sentences (> 400 tokens) | Hard-truncated at the token boundary; tail content is lost |
+| Queries about content not in the PDF | Gemini returns "I cannot find information about [topic]" |
+| Highly technical or domain-specific language | Embedding model may not capture semantic similarity well; retrieval degrades |
+| Multi-PDF questions | Not supported; only one PDF per session |
+| Non-English PDFs | Works for most Latin-script languages; quality degrades for CJK and RTL scripts |
+
+---
 
 1. Clone Repository
 git clone https://github.com/Aaditya902/PDF-Knowledge-base-Q-A-System.git 

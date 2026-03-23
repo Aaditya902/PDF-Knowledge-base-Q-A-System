@@ -136,6 +136,33 @@ All errors are logged server-side via Python logging for observability.
 
 ---
 
+Improvement Ideas
+Retrieval quality
+
+Switch from IndexFlatL2 to IndexIVFFlat or HNSW for faster search on large documents
+Use cosine similarity instead of L2 distance (more standard for sentence embeddings)
+Add metadata filtering (e.g. filter by page number)
+Hybrid search: combine FAISS semantic search with BM25 keyword search
+
+Chunking
+
+Use the actual all-MiniLM-L6-v2 tokenizer instead of cl100k_base as a proxy
+Respect document structure (headings, sections) when splitting
+
+Answer quality
+
+Add conversation history for follow-up questions
+Implement re-ranking (e.g. cross-encoder) on retrieved chunks before sending to Gemini
+Return source page numbers alongside answers
+
+Infrastructure
+
+Persist FAISS index to disk so large PDFs don't need reprocessing on session refresh
+Add support for multiple PDFs per session
+Replace Streamlit session state with a proper backend (FastAPI + Redis) for production scale
+
+Setup Instructions:
+
 1. Clone Repository
 git clone https://github.com/Aaditya902/PDF-Knowledge-base-Q-A-System.git 
 cd PDF-Knowledge-base-Q-A-System
@@ -193,5 +220,16 @@ Sends context + query to Gemini
 Generates response
 
 
+## Configuration
 
+All tunable parameters live in `config.py` and `models/document_processor.py`.
+
+| Parameter | File | Default | Description |
+|---|---|---|---|
+| `SIMILARITY_THRESHOLD` | `config.py` | `0.3` | Minimum score for a chunk to be returned |
+| `TOP_K_RESULTS` | `config.py` | `5` | Chunks retrieved per query |
+| `TEMPERATURE` | `config.py` | `0.3` | Gemini generation temperature |
+| `MAX_OUTPUT_TOKENS` | `config.py` | `1024` | Max tokens in Gemini response |
+| `MAX_TOKENS` | `document_processor.py` | `400` | Max tokens per chunk |
+| `overlap_sentences` | `document_processor.py` | `2` | Sentences of overlap between chunks |
 

@@ -1,9 +1,9 @@
-## PDF Knowledge Base Q&A System (Gemini + FAISS + Streamlit):
+## PDF Knowledge Base Q&A System (Gemini + FAISS + Streamlit)
 
 An AI-powered document question-answering system. Upload a PDF, ask questions, get context-aware answers backed by semantic search and Google Gemini.
 
 
-## Tech Stack:
+## Tech Stack
 
 | Layer        | Technology                                          | Reasoning                                 |
 | ------------ | --------------------------------------------------- | ----------------------------------------- |
@@ -20,7 +20,7 @@ An AI-powered document question-answering system. Upload a PDF, ask questions, g
 
 
 
-## Project Structure:
+## Project Structure
 
 
 ```bash
@@ -47,7 +47,7 @@ flowchart TD
 ![alt text](download.svg)
 
 
-## Chunking Strategy:
+## Chunking Strategy
 
 Text is split using a token-aware, sentence-level chunker built on tiktoken.
 
@@ -82,7 +82,7 @@ Sends context + query to Gemini
 Generates response
 
 
-## Parameters (configurable in `document_processor.py`):
+## Parameters (configurable in `document_processor.py`)
 
 | Parameter | Default | Description |
 |---|---|---|
@@ -90,7 +90,7 @@ Generates response
 | `overlap_sentences` | 2 | Sentences carried into next chunk |
 
 
-## Retrieval Method:
+## Retrieval Method
 
 Retrieval uses FAISS IndexFlatL2, exact brute-force nearest-neighbour search over L2 (Euclidean) distance.
 
@@ -106,7 +106,7 @@ Flow:
 Fallback: If no chunks meet the threshold, the retriever retries with k=1 and no threshold filter, ensuring the model always receives some context rather than returning a blank answer.
 
 
-## Confidence Scoring:
+## Confidence Scoring
 
 The system calculates confidence based on similarity scores:
 

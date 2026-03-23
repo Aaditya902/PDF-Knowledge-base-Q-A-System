@@ -5,21 +5,21 @@ An AI-powered document question-answering system. Upload a PDF, ask questions, g
 
 Key Features:
 
-Upload and process PDF documents
+- Upload and process PDF documents
 
-Smart text chunking with overlap
+- Smart text chunking with overlap
 
-Semantic search using FAISS
+- Semantic search using FAISS
 
-Local embeddings with Sentence Transformers
+- Local embeddings with Sentence Transformers
 
-Answer generation using Google Gemini
+- Answer generation using Google Gemini
 
-Confidence scoring for responses
+- Confidence scoring for responses
 
-Interactive UI built with Streamlit
+- Interactive UI built with Streamlit
 
-Debug view for retrieved context
+- Debug view for retrieved context
 
 
 Tech Stack:

@@ -6,12 +6,19 @@ An AI-powered document question-answering system. Upload a PDF, ask questions, g
 Key Features:
 
 Upload and process PDF documents
+
 Smart text chunking with overlap
+
 Semantic search using FAISS
+
 Local embeddings with Sentence Transformers
+
 Answer generation using Google Gemini
+
 Confidence scoring for responses
+
 Interactive UI built with Streamlit
+
 Debug view for retrieved context
 
 

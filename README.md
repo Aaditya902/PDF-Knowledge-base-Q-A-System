@@ -1,28 +1,9 @@
-PDF Knowledge Base Q&A System (Gemini + FAISS + Streamlit):
+## PDF Knowledge Base Q&A System (Gemini + FAISS + Streamlit):
 
 An AI-powered document question-answering system. Upload a PDF, ask questions, get context-aware answers backed by semantic search and Google Gemini.
 
 
-Key Features:
-
-- Upload and process PDF documents
-
-- Smart text chunking with overlap
-
-- Semantic search using FAISS
-
-- Local embeddings with Sentence Transformers
-
-- Answer generation using Google Gemini
-
-- Confidence scoring for responses
-
-- Interactive UI built with Streamlit
-
-- Debug view for retrieved context
-
-
-Tech Stack:
+## Tech Stack:
 
 | Layer        | Technology                                          | Reasoning                                 |
 | ------------ | --------------------------------------------------- | ----------------------------------------- |
@@ -39,7 +20,7 @@ Tech Stack:
 
 
 
-Project Structure:
+## Project Structure:
 
 
 ```bash
@@ -59,147 +40,21 @@ PDF-Knowledge-base-Q-A-System/
 
 ```
 
-System Architecture:
+## System Architecture:
 
 flowchart TD
 
 ![alt text](download.svg)
 
 
-Chunking Strategy:
+## Chunking Strategy:
 
 Text is split using a token-aware, sentence-level chunker built on tiktoken.
-Why token-aware: The embedding model all-MiniLM-L6-v2 has a hard limit of 512 tokens. A character-based chunker (e.g. 1000 chars) silently produces chunks that exceed this limit the model truncates them without any error, degrading retrieval quality invisibly on longer documents.
 
-How it works:
+Why token-aware: 
+The embedding model all-MiniLM-L6-v2 has a hard limit of 512 tokens. A character-based chunker (e.g. 1000 chars) silently produces chunks that exceed this limit the model truncates them without any error, degrading retrieval quality invisibly on longer documents.
 
-Full document text is split into sentences using regex boundary detection.
-Sentences are accumulated into a chunk until the next sentence would push the token count past 400 (conservative limit below the 512-token cap).
-When a chunk is full, the last 2 sentences are carried into the next chunk as overlap preserving cross-boundary context.
-Any single sentence exceeding 400 tokens is hard-truncated at the token boundary.
-
-
-**Parameters (configurable in `document_processor.py`):**
-
-| Parameter | Default | Description |
-|---|---|---|
-| `max_tokens` | 400 | Max tokens per chunk |
-| `overlap_sentences` | 2 | Sentences carried into next chunk |
-
-
-Retrieval Method:
-
-Retrieval uses FAISS IndexFlatL2 — exact brute-force nearest-neighbour search over L2 (Euclidean) distance.
-Flow:
-
-Query is embedded using the same all-MiniLM-L6-v2 model used at index time.
-FAISS searches all chunk embeddings and returns the top-k closest vectors.
-L2 distance is converted to a similarity score: similarity = 1 / (1 + distance).
-Chunks below the similarity threshold (0.3) are filtered out.
-Remaining results are sorted by similarity descending.
-Top 3 chunks are passed as context to Gemini.
-
-Fallback: If no chunks meet the threshold, the retriever retries with k=1 and no threshold filter, ensuring the model always receives some context rather than returning a blank answer.
-
-
-Confidence Scoring:
-
-The system calculates confidence based on similarity scores:
-
-| Score   | Meaning         |
-| ------- | --------------- |
-| > 0.5   | High confidence |
-| 0.3–0.5 | Medium          |
-| < 0.3   | Low             |
-
-
-Guardrails
-Prompt-level:
-
-Gemini is instructed to answer only from the provided context.
-If the context doesn't contain relevant information, it must say so explicitly rather than hallucinating.
-
-Retrieval-level:
-
-Similarity threshold of 0.3 prevents low-quality chunks from reaching the model.
-Only the top 3 chunks are sent, keeping context focused.
-
-Application-level:
-
-Per-session temp directories prevent file collisions between concurrent users.
-Config never raises at import time, missing API key shows a user-friendly error instead of a crash.
-All errors are logged server-side via Python logging for observability.
-
-## Known Failure Cases
-
-| Scenario | Behaviour |
-|---|---|
-| Scanned PDF (image-based) | PyPDF2 extracts no text; app shows "No text could be extracted" |
-| Very long sentences (> 400 tokens) | Hard-truncated at the token boundary; tail content is lost |
-| Queries about content not in the PDF | Gemini returns "I cannot find information about [topic]" |
-| Highly technical or domain-specific language | Embedding model may not capture semantic similarity well; retrieval degrades |
-| Multi-PDF questions | Not supported; only one PDF per session |
-| Non-English PDFs | Works for most Latin-script languages; quality degrades for CJK and RTL scripts |
-
----
-
-Improvement Ideas
-Retrieval quality
-
-Switch from IndexFlatL2 to IndexIVFFlat or HNSW for faster search on large documents
-Use cosine similarity instead of L2 distance (more standard for sentence embeddings)
-Add metadata filtering (e.g. filter by page number)
-Hybrid search: combine FAISS semantic search with BM25 keyword search
-
-Chunking
-
-Use the actual all-MiniLM-L6-v2 tokenizer instead of cl100k_base as a proxy
-Respect document structure (headings, sections) when splitting
-
-Answer quality
-
-Add conversation history for follow-up questions
-Implement re-ranking (e.g. cross-encoder) on retrieved chunks before sending to Gemini
-Return source page numbers alongside answers
-
-Infrastructure
-
-Persist FAISS index to disk so large PDFs don't need reprocessing on session refresh
-Add support for multiple PDFs per session
-Replace Streamlit session state with a proper backend (FastAPI + Redis) for production scale
-
-Setup Instructions:
-
-1. Clone Repository
-git clone https://github.com/Aaditya902/PDF-Knowledge-base-Q-A-System.git 
-cd PDF-Knowledge-base-Q-A-System
-
-2. Create Virtual Environment
-python -m venv myenv
-source myenv/bin/activate      # Mac/Linux
-myenv\Scripts\activate         # Windows
-
-3. Install Dependencies
-pip install -r requirements.txt
-
-4. Configure Environment Variables
-
-Create a .env file in root:
-
-GOOGLE_API_KEY=your_google_api_key
-
-
-
-Run the Application:
-streamlit run app.py
-
-Open in browser:
-
-http://localhost:8501
-
-
-
-How It Works:
+## How It Works
 1. Document Processing
 
 Extracts text using PyPDF2
@@ -225,6 +80,128 @@ Performs similarity search
 Retrieves top-k relevant chunks
 Sends context + query to Gemini
 Generates response
+
+
+**Parameters (configurable in `document_processor.py`):**
+
+| Parameter | Default | Description |
+|---|---|---|
+| `max_tokens` | 400 | Max tokens per chunk |
+| `overlap_sentences` | 2 | Sentences carried into next chunk |
+
+
+## Retrieval Method:
+
+Retrieval uses FAISS IndexFlatL2, exact brute-force nearest-neighbour search over L2 (Euclidean) distance.
+
+Flow:
+
+1. Query is embedded using the same all-MiniLM-L6-v2 model used at index time.
+2. FAISS searches all chunk embeddings and returns the top-k closest vectors.
+3. L2 distance is converted to a similarity score: similarity = 1 / (1 + distance).
+4. Chunks below the similarity threshold (0.3) are filtered out.
+5. Remaining results are sorted by similarity descending.
+6. Top 3 chunks are passed as context to Gemini.
+
+Fallback: If no chunks meet the threshold, the retriever retries with k=1 and no threshold filter, ensuring the model always receives some context rather than returning a blank answer.
+
+
+## Confidence Scoring:
+
+The system calculates confidence based on similarity scores:
+
+| Score   | Meaning         |
+| ------- | --------------- |
+| > 0.5   | High confidence |
+| 0.3–0.5 | Medium          |
+| < 0.3   | Low             |
+
+
+## Guardrails
+Prompt-level:
+
+- Gemini is instructed to answer only from the provided context.
+- If the context doesn't contain relevant information, it must say so explicitly rather than hallucinating.
+
+Retrieval-level:
+
+- Similarity threshold of 0.3 prevents low-quality chunks from reaching the model.
+- Only the top 3 chunks are sent, keeping context focused.
+
+Application-level:
+
+- Per-session temp directories prevent file collisions between concurrent users.
+- Config never raises at import time, missing API key shows a user-friendly error instead of a crash.
+- All errors are logged server-side via Python logging for observability.
+
+## Known Failure Cases
+
+| Scenario | Behaviour |
+|---|---|
+| Scanned PDF (image-based) | PyPDF2 extracts no text; app shows "No text could be extracted" |
+| Very long sentences (> 400 tokens) | Hard-truncated at the token boundary; tail content is lost |
+| Queries about content not in the PDF | Gemini returns "I cannot find information about [topic]" |
+| Highly technical or domain-specific language | Embedding model may not capture semantic similarity well; retrieval degrades |
+| Multi-PDF questions | Not supported; only one PDF per session |
+| Non-English PDFs | Works for most Latin-script languages; quality degrades for CJK and RTL scripts |
+
+---
+
+## Improvement Ideas
+
+Retrieval quality:
+
+- Switch from IndexFlatL2 to IndexIVFFlat or HNSW for faster search on large documents
+- Use cosine similarity instead of L2 distance (more standard for sentence embeddings)
+- Add metadata filtering (e.g. filter by page number)
+- Hybrid search: combine FAISS semantic search with BM25 keyword search
+
+Chunking:
+
+- Use the actual all-MiniLM-L6-v2 tokenizer instead of cl100k_base as a proxy
+- Respect document structure (headings, sections) when splitting
+
+Answer quality:
+
+- Add conversation history for follow-up questions
+- Implement re-ranking (e.g. cross-encoder) on retrieved chunks before sending to Gemini
+- Return source page numbers alongside answers
+
+Infrastructure
+
+- Persist FAISS index to disk so large PDFs don't need reprocessing on session refresh
+- Add support for multiple PDFs per session
+- Replace Streamlit session state with a proper backend (FastAPI + Redis) for production scale
+
+## Setup 
+
+1. Clone Repository:
+git clone https://github.com/Aaditya902/PDF-Knowledge-base-Q-A-System.git 
+cd PDF-Knowledge-base-Q-A-System
+
+2. Create Virtual Environment:
+python -m venv myenv
+source myenv/bin/activate      # Mac/Linux
+myenv\Scripts\activate         # Windows
+
+3. Install Dependencies:
+pip install -r requirements.txt
+
+4. Configure Environment Variables:
+
+Create a .env file in root:
+
+GOOGLE_API_KEY=your_google_api_key
+
+
+
+Run the Application:
+streamlit run app.py
+
+Open in browser:
+
+http://localhost:8501
+
 
 
 ## Configuration

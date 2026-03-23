@@ -40,7 +40,7 @@ PDF-Knowledge-base-Q-A-System/
 
 ```
 
-## System Architecture:
+## System Architecture
 
 flowchart TD
 

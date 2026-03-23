@@ -55,34 +55,34 @@ Why token-aware:
 The embedding model all-MiniLM-L6-v2 has a hard limit of 512 tokens. A character-based chunker (e.g. 1000 chars) silently produces chunks that exceed this limit the model truncates them without any error, degrading retrieval quality invisibly on longer documents.
 
 ## How It Works
-1. Document Processing
+1. Document Processing:
 
 Extracts text using PyPDF2
 Adds page references
 
-2. Chunking
+2. Chunking:
 
 Splits text into chunks (MAX_CHUNK_SIZE = 1000)
 Adds overlapping context for better retrieval
 
-3. Embedding
+3. Embedding:
 
 Uses all-MiniLM-L6-v2
 Converts text into dense vectors
 
-4. Retrieval
+4. Retrieval:
 
 Stores embeddings in FAISS index
 Performs similarity search
 
-5. Answer Generation
+5. Answer Generation:
 
 Retrieves top-k relevant chunks
 Sends context + query to Gemini
 Generates response
 
 
-**Parameters (configurable in `document_processor.py`):**
+# Parameters (configurable in `document_processor.py`):
 
 | Parameter | Default | Description |
 |---|---|---|

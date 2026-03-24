@@ -62,7 +62,7 @@ Adds page references
 
 2. Chunking:
 
-Splits text into chunks (MAX_CHUNK_SIZE = 1000)
+Splits text into chunks (MAX_CHUNK_SIZE = 400)
 Adds overlapping context for better retrieval
 
 3. Embedding:

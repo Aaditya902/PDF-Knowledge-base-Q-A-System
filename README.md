@@ -177,15 +177,19 @@ Infrastructure
 
 1. Clone Repository:
 git clone https://github.com/Aaditya902/PDF-Knowledge-base-Q-A-System.git 
+
 cd PDF-Knowledge-base-Q-A-System
 
 2. Create Virtual Environment:
 python -m venv myenv
 source myenv/bin/activate      # Mac/Linux
+
 myenv\Scripts\activate         # Windows
 
 3. Install Dependencies:
+
 pip install -r requirements.txt
+
 
 4. Configure Environment Variables:
 
@@ -196,6 +200,7 @@ GOOGLE_API_KEY=your_google_api_key
 
 
 Run the Application:
+
 streamlit run app.py
 
 Open in browser:

@@ -24,7 +24,7 @@ class KnowledgeRetriever:
 
     def build_index(self, chunks: List[str]):
         self.chunks = chunks
-        self.embeddings = np.array(self._get_embeddings(chunks))
+        self.embeddings = np.array(self._get_embeddings(chunks)).astype(np.float32)
     
         faiss.normalize_L2(self.embeddings)         
     

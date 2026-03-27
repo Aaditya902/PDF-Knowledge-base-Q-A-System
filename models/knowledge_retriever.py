@@ -25,7 +25,10 @@ class KnowledgeRetriever:
     def build_index(self, chunks: List[str]):
         self.chunks = chunks
         self.embeddings = np.array(self._get_embeddings(chunks))
-        self.index = faiss.IndexFlatL2(self.embeddings.shape[1])
+    
+        faiss.normalize_L2(self.embeddings)         
+    
+        self.index = faiss.IndexFlatIP(self.embeddings.shape[1])  
         self.index.add(self.embeddings)
         logger.info("FAISS index built with %d chunks", len(chunks))
 
@@ -34,12 +37,14 @@ class KnowledgeRetriever:
             return []
         
         query_embedding = np.array([self._get_embedding(text)])
+        faiss.normalize_L2(query_embedding)          
+        
         distances, indices = self.index.search(query_embedding, min(k, len(self.chunks)))
         
         results = []
         for i, index in enumerate(indices[0]):
             if index != -1 and index < len(self.chunks):
-                similarity = 1 / (1 + distances[0][i])
+                similarity = distances[0][i]          
                 if similarity >= SIMILARITY_THRESHOLD:
                     results.append((self.chunks[index], similarity))
         
